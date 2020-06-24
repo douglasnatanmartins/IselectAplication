@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:iselectaplication1990/src/screems/s/pages/adiciona_servico.dart';
+import 'package:iselectaplication1990/src/screems/s/widgets_pages/adiciona_servico.dart';
 
 class LocalizacaoServico extends StatefulWidget {
 

@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/model/user_model.dart';
-import 'package:iselectaplication1990/src/home_screem_page.dart';
-import 'package:iselectaplication1990/src/login_screem.dart';
-import 'package:iselectaplication1990/src/screems/s/pages/home_screem_botton_navigator.dart';
+import 'package:iselectaplication1990/src/home/home_screem_botton_navigator.dart';
+import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/login/login_screem.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -25,43 +24,18 @@ class _SplashScreemState extends State<SplashScreem> {
           context,
           MaterialPageRoute(
               builder: (_) => ScopedModelDescendant<UserModel>(
-                    builder: (context, child, model) {
+                    builder: (_, __, model) {
                       if (!model.isloggedIn()) {
                         return LoginPage();
                       } else {
                         return HomeScreen();
                       }
                     },
-                  )));
+                  )
+          ));
     });
   }
 
-  /* startTime() async {
-    return new Timer(Duration(seconds: 5 ), NavigatorPage);
-  }
-
-
-  void NavigatorPage() {
-
-   Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ScopedModelDescendant<UserModel>(
-            builder: (context, child, model) {
-              if (!model.isloggedIn()){
-                return LoginPage();
-              } else{
-                return HomeScreen( );
-              }
-            }
-        )
-    ));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    startTime();
-  }
-*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(

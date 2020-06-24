@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/config/perfil_config/perfil_config.dart';
 
 class Localizacao extends StatefulWidget {
 
@@ -215,6 +216,22 @@ class _LocalizacaoState extends State<Localizacao> {
                       ),
                     )
                 ),
+                actions: [
+                  FlatButton(
+                    onPressed: (){
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => PerfilConfig()
+                      ));
+                    },
+                    child: Text(
+                      "Ok",
+                      style: GoogleFonts.amaranth(
+                        color: Colors.green,
+                        fontSize: 18
+                      ),
+                    ),
+                  )
+                ],
               )
           );
 

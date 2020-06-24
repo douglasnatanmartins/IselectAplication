@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:iselectaplication1990/model/user_model.dart';
 import 'package:iselectaplication1990/src/splash_screem.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -8,15 +9,22 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.white, // navigation bar color
+    ));
+
+
     return ScopedModel<UserModel>(
       model: UserModel(),
       child: ScopedModelDescendant<UserModel>(
         builder: (context, child, model){
           return MaterialApp(
               debugShowCheckedModeBanner: false,
-              title: 'Flutter Demo',
+              title: 'Iselect',
               theme: ThemeData(
                 // primarySwatch: Colors.black,
                 primaryColor: Colors.orange,
@@ -32,6 +40,5 @@ class MyApp extends StatelessWidget {
 }
 
 
-/// Criar tela de privacidade no cadastro de usuario Listando os Campos
 /// Verificar uma forma de conseguir criar um percential para as qualificacoes dos servicos.
 /// Criar uma tela para editar o Servico e nao somente Apagalo.

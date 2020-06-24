@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/model/model_servico.dart';
-import 'package:iselectaplication1990/src/screems/s/pages/detalhe_anuncio.dart';
+import 'package:iselectaplication1990/src/screems/s/widgets_pages/detalhe_anuncio.dart';
 import 'package:iselectaplication1990/src/tiles/item_servico_favorito.dart';
 
 
@@ -16,7 +15,6 @@ class Favoritos extends StatefulWidget {
 
 class _FavoritosState extends State<Favoritos> {
 
-  final TextEditingController _searchQuery = TextEditingController();
   final _controller = StreamController<QuerySnapshot>.broadcast();
 
 
@@ -59,23 +57,10 @@ class _FavoritosState extends State<Favoritos> {
 
     final orientation = MediaQuery.of(context).orientation;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.orange,
-        title: Text(
-          "Mis Favoritos",
-          style: GoogleFonts.amaranth(
-              color: Colors.black,
-              fontSize: 22
-          ),
-        ),
-      ),
-      body: Container(
-          child: Column(
-            children: <Widget>[
-              /* Row(
+    return Container(
+        child: Column(
+          children: <Widget>[
+            /* Row(
                 children: <Widget>[
                   StreamBuilder<QuerySnapshot>(
                     stream: Firestore.instance.collection("categoriasdeservico")
@@ -158,72 +143,69 @@ class _FavoritosState extends State<Favoritos> {
                   )
                 ],
               ),*/
-              SizedBox(height: 25),
-              StreamBuilder(
-                stream: _controller.stream,
-                builder: (context, snapshot){
-                  switch(snapshot.connectionState){
-                    case ConnectionState.none:
-                    case ConnectionState.waiting:
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                      break;
-                    case ConnectionState.active:
-                    case ConnectionState.done:
+            SizedBox(height: 25),
+            StreamBuilder(
+              stream: _controller.stream,
+              builder: (context, snapshot){
+                switch(snapshot.connectionState){
+                  case ConnectionState.none:
+                  case ConnectionState.waiting:
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                    break;
+                  case ConnectionState.active:
+                  case ConnectionState.done:
 
-                      QuerySnapshot querySnapshot = snapshot.data;
+                    QuerySnapshot querySnapshot = snapshot.data;
 
-                      if( querySnapshot.documents.length == 0 ){
-                        print(_idUsuarioLogado);
-                        return Container(
+                    if( querySnapshot.documents.length == 0 ){
+                      return Container(
                           padding: EdgeInsets.all(25),
                           child: Center(
                             child: Text("Ningún Favorito! :( ", style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold
                             ),),                          )
-                        );
-                      }
-                      return Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: (orientation == Orientation.portrait) ? 2 :3,
-                                  crossAxisSpacing: 10,
-                                  childAspectRatio: 0.7,
-                                  mainAxisSpacing: 10
-                              ),
-                              itemCount: querySnapshot.documents.length,
-                              itemBuilder: (_, index){
-
-                                List<DocumentSnapshot> servicos =
-                                querySnapshot.documents.toList();
-                                DocumentSnapshot documentSnapshot = servicos[index];
-                                ModelServico favorito = ModelServico.fromdocumentSnapshot(documentSnapshot);
-
-                                print(favorito);
-
-                                return ItemServicoFavoritos(
-                                  servico: favorito,
-                                  onTapItem: (){
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => DetalheAnuncio(favorito)
-                                    ));
-                                  },
-                                );
-                              }
-                          ),
-                        ),
                       );
-                  }
-                  return Container();
-                },
-              )
-            ],
-          )
-      ),
+                    }
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: GridView.builder(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: (orientation == Orientation.portrait) ? 2 :3,
+                                crossAxisSpacing: 10,
+                                childAspectRatio: 0.7,
+                                mainAxisSpacing: 10
+                            ),
+                            itemCount: querySnapshot.documents.length,
+                            itemBuilder: (_, index){
+
+                              List<DocumentSnapshot> servicos =
+                              querySnapshot.documents.toList();
+                              DocumentSnapshot documentSnapshot = servicos[index];
+                              ModelServico favorito = ModelServico.fromdocumentSnapshot(documentSnapshot);
+
+
+                              return ItemServicoFavoritos(
+                                servico: favorito,
+                                onTapItem: (){
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => DetalheAnuncio(favorito)
+                                  ));
+                                }, onTapRemover:null,
+                              );
+                            }
+                        ),
+                      ),
+                    );
+                }
+                return Container();
+              },
+            )
+          ],
+        )
     );
   }
 }

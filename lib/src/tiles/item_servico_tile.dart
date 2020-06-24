@@ -7,7 +7,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 class ItemServicoHomeTile extends StatefulWidget {
-
   ModelServico servico;
   VoidCallback onTapItem;
   VoidCallback onTapRemover;
@@ -23,8 +22,6 @@ class ItemServicoHomeTile extends StatefulWidget {
 }
 
 class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
-
-
   _recuperarDadosDoUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
@@ -33,31 +30,28 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
     await _getEvaluaciones();
   }
 
-  _getEvaluaciones()  async {
+  Future<void> _getEvaluaciones() async {
     DocumentSnapshot snapshot = await Firestore.instance
         .collection("qualificacoes")
         .document(widget.servico.id)
         .collection("stars")
-        .document(_idUsuarioLogado).get();
+        .document(_idUsuarioLogado)
+        .get();
 
     Map<String, dynamic> dados = snapshot.data;
+    print(dados);
 
-    if (dados == null) {
-      print("Dadoos é nulo ${dados}");
-    }
-    if (snapshot.data["rating"] != null) {
-      setState(() {
-        rating = snapshot.data["rating"];
-      });
+    if (dados["rating"] != null) {
+        rating = dados["rating"];
+
+    } else {
+      return 1.0;
     }
 
-    if (snapshot.data["idServico"] != null) {
-      setState(() {
-        docId = snapshot.data["idServico"];
-      });
+    if (dados["idServico"] != null) {
+      docId = dados["idServico"];
     }
   }
-
 
   var rating = 1.0;
   String docId;
@@ -71,8 +65,6 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
 
   @override
   Widget build(BuildContext context) {
-
-
     MediaQueryData mediaQueryData = MediaQuery.of(context);
 
     return GestureDetector(
@@ -86,8 +78,7 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                   color: Color(0xFF656565).withOpacity(0.15),
                   blurRadius: 2.0,
                   spreadRadius: 1.0,
-                  offset: Offset(4.0, 10.0)
-              )
+                  offset: Offset(4.0, 10.0))
             ]),
         child: Wrap(
           children: [
@@ -100,15 +91,18 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                   children: [
                     Container(
                       width: 200,
-                      height: mediaQueryData.size.height /4.3,
+                      height: mediaQueryData.size.height / 4.3,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(7.0),
                               topRight: Radius.circular(7.0)),
                           image: DecorationImage(
-                              image: NetworkImage(widget.servico.fotos[0]), fit: BoxFit.cover)),
+                              image: NetworkImage(widget.servico.fotos[0]),
+                              fit: BoxFit.cover)),
                     ),
-                    SizedBox(width: 20,),
+                    SizedBox(
+                      width: 20,
+                    ),
                     Container(
                       height: 25.5,
                       width: 85.0,
@@ -119,75 +113,70 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                               topLeft: Radius.circular(5.0))),
                       child: Center(
                           child: Text(
-                            "Destacado",
-                            style: TextStyle(
-                                color: Colors.white, fontWeight: FontWeight.w600),
-                          )),
+                        "Destacado",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w600),
+                      )),
                     ),
                   ],
                 ),
                 Padding(padding: EdgeInsets.only(top: 7.0)),
                 Padding(
-                    padding:
-                    const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
-                    child:
-                    FutureBuilder<DocumentSnapshot>(
-                      future: Firestore.instance
-                          .collection("qualificacoes")
-                          .document(widget.servico.id)
-                          .collection("stars")
-                          .document(_idUsuarioLogado)
-                          .get(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return SizedBox(
-                            height: 10,
-                            width: 100,
-                            child: Shimmer.fromColors(
+                  padding:
+                      const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
+                  child: FutureBuilder<DocumentSnapshot>(
+                    future: Firestore.instance
+                        .collection("qualificacoes")
+                        .document(widget.servico.id)
+                        .collection("stars")
+                        .document(_idUsuarioLogado)
+                        .get(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return SizedBox(
+                          height: 10,
+                          width: 100,
+                          child: Shimmer.fromColors(
                               period: Duration(milliseconds: 1000),
-                                child: Container(
-                                    color: Colors.white
-                                ),
-                                baseColor: Colors.orange,
-                                highlightColor: Colors.white
-                            ),
-                          );
-                        }
-                        switch (snapshot.connectionState) {
-                          case ConnectionState.none:
-                          case ConnectionState.waiting:
-                            return Container();
-                            break;
-                          case ConnectionState.active:
-                          case ConnectionState.done:
-                            if (snapshot.hasError) {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            return SmoothStarRating(
-                              isReadOnly: true,
-                              rating: rating,
-                              size: 12,
-                              borderColor: Colors.grey,
-                              color: Colors.amber,
-                              filledIconData: Icons.star,
-                              halfFilledIconData: Icons.star_half,
-                              defaultIconData: Icons.star_border,
-                              starCount: 5,
-                              allowHalfRating: false,
-                              spacing: 2,
-                              onRated: (value) {
-                                setState(() {
-                                  if (snapshot.data != null)
-                                    rating = snapshot.data["rating"];
-                                });
-                              },
+                              child: Container(color: Colors.white),
+                              baseColor: Colors.orange,
+                              highlightColor: Colors.white),
+                        );
+                      }
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                          return Container();
+                          break;
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: CircularProgressIndicator(),
                             );
-                        }
-                        return Container();
-                      },
-                    ),
+                          }
+                          return SmoothStarRating(
+                            isReadOnly: true,
+                            rating: rating,
+                            size: 12,
+                            borderColor: Colors.grey,
+                            color: Colors.amber,
+                            filledIconData: Icons.star,
+                            halfFilledIconData: Icons.star_half,
+                            defaultIconData: Icons.star_border,
+                            starCount: 5,
+                            allowHalfRating: false,
+                            spacing: 2,
+                            onRated: (value) {
+                                setState(() {
+                                  rating = value;
+                                });
+                            },
+                          );
+                      }
+                      return Container();
+                    },
+                  ),
                 ),
                 Padding(padding: EdgeInsets.only(top: 2.0)),
                 Padding(
@@ -201,23 +190,20 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                             color: Colors.black,
                             fontFamily: "Sans",
                             fontWeight: FontWeight.w500,
-                            fontSize: 13.0)
-                    ),
+                            fontSize: 13.0)),
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(top: 1.0)),
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                  child: Text(
-                      widget.servico.preco,
+                  child: Text(widget.servico.preco,
                       style: GoogleFonts.acme(
                         textStyle: TextStyle(
                             color: Colors.orange[700],
                             fontFamily: "Sans",
                             fontWeight: FontWeight.w500,
                             fontSize: 14.0),
-                      )
-                  ),
+                      )),
                 ),
               ],
             ),
