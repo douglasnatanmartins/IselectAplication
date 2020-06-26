@@ -26,7 +26,7 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
 
 
   var rating = 1.0;
-  double initialRating = 1.0;
+  double initialRating = 0.0;
   double result = 0.0;
   var ratingSoma;
   var idDoc;
@@ -43,7 +43,7 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
 
 
 
-  Future<void> _getClassificacao(){
+   _getClassificacao(){
     Stream<QuerySnapshot> querySnapshot = Firestore.instance.
     collection("qualificacoes").
     document(widget.servico.id).
@@ -61,23 +61,25 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
 
         }
         result = ratingSoma += doc.data["rating"] / snapshot.length;
-
+        initialRating = result.round().roundToDouble();
       }
-      initialRating = result;
       print(initialRating);
     }).toList();
+    return initialRating;
+
   }
 
   @override
   void initState() {
     super.initState();
+      rating = result.round().roundToDouble();
+
     _recuperarDadosDoUsuario();
   }
 
   @override
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
-
     return GestureDetector(
       onTap: widget.onTapItem,
       child: Container(
@@ -135,7 +137,7 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
                     const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
                     child: SmoothStarRating(
                       isReadOnly: true,
-                      rating: initialRating,
+                      rating: rating,
                       size: 12,
                       borderColor: Colors.grey,
                       color: Colors.amber,
