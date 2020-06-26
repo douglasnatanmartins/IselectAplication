@@ -1,7 +1,28 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class ModelServico {
 
+
+    String _idUsuarioLogado;
+    FirebaseUser firebaseUser;
+
+  bool loading = false;
+
+    getFirebaseUser() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseUser usuarioLogado = await auth.currentUser();
+    _idUsuarioLogado = usuarioLogado.uid;
+  }
+
+  FirebaseStorage storage = FirebaseStorage.instance;
+  Firestore firestore  = Firestore.instance;
+  StorageReference get storageRef => storage.ref().child("Servicos" + _idUsuarioLogado).child(id);
 
   String _id; // id do servico
   String _categoria; // id da categoria
@@ -19,6 +40,7 @@ class ModelServico {
   String _codigoPais;
 
   List<String> _fotos;
+  List<dynamic> newImages;
 
   ModelServico();
 
@@ -28,7 +50,7 @@ class ModelServico {
     this.desc = documentSnapshot["desc"];
     this.title = documentSnapshot["title"];
     this.telefone = documentSnapshot["telefone"];
-    this.fotos = List<String>.from(documentSnapshot["fotos"]);
+    this.fotos = List<String>.from(documentSnapshot.data["fotos"] as List<dynamic>);
     this.preco = documentSnapshot["preco"];
     this.lat = documentSnapshot["lat"];
     this.long = documentSnapshot["long"];
@@ -70,6 +92,40 @@ class ModelServico {
     };
     return map;
   }
+
+
+  Future<void> saveImages() async {
+    loading = true;
+
+    final List<String> updateImages = [];
+
+    for(final newImage in newImages ){
+      if(fotos.contains(newImage)){
+        updateImages.add(newImage as String);
+      } else {
+        final StorageUploadTask task = storageRef.child(Uuid().v1()).putFile(newImage as File);
+        final StorageTaskSnapshot snapshot = await task.onComplete;
+        final String url = await snapshot.ref.getDownloadURL() as String;
+        updateImages.add(url);
+      }
+    }
+    for(final image in fotos){
+      if(!newImages.contains(image)){
+        try {
+          final ref = await storage.getReferenceFromUrl( image );
+          await ref.delete( );
+        } catch (e){
+          debugPrint("Falha ao  deletar $image");
+        }
+      }
+    }
+      fotos = updateImages;
+
+    loading = false;
+  }
+
+
+
   List<String> get fotos => _fotos;
 
   String get codigoPais => _codigoPais;

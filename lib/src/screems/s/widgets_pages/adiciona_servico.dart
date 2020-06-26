@@ -41,7 +41,7 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
   _AdiconaServicosState(this.latitude, this.longitude, this.cidade, this.rua, this.estado, this.pais);
 
   var maskTextInputFormatter = MaskTextInputFormatter(
-      mask: "#### ### ###", filter: {"#": RegExp(r'[0-9]')});
+      mask: "##############", filter: {"#": RegExp(r'[0-9]')});
 
 
   var selecCurrency;
@@ -117,7 +117,7 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
           .setData(_servico.toMap()).then((_){
 
         Navigator.pop(_dialogContext);
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true);
       });
 
     });
@@ -455,8 +455,8 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
                                     borderRadius: BorderRadius.circular(6)
                                 ),
                               ),
-                              initialSelection: 'PY',
-                              favorite: ['+595', 'PY'],
+                              initialSelection: 'BR',
+                              favorite: ['+55', 'BR'],
                               textStyle: GoogleFonts.amaranth(
                                   textStyle: TextStyle(
                                       color: Colors.grey[600],
@@ -510,7 +510,7 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
                   ),
                   SizedBox(height: 20),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       if (_formKey.currentState.validate()) {
                         //salvando os Campos
                         _formKey.currentState.save();
@@ -519,7 +519,8 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
                         _dialogContext = context;
 
                         //savar servico
-                        _salvarServico();
+                        await _salvarServico();
+
                       }
                     },
                     child: Container(

@@ -7,9 +7,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/componentes/localizacao.dart';
 import 'package:iselectaplication1990/componentes/localizacao_servico.dart';
 import 'package:iselectaplication1990/model/model_servico.dart';
+import 'package:iselectaplication1990/src/edita_servico/edita_servico.dart';
 import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/config/perfil_config/perfil_config.dart';
 import 'package:iselectaplication1990/src/tiles/item_servico_tile.dart';
 import 'package:iselectaplication1990/src/tiles/item_servico_tile_misservicos.dart';
+import 'package:scoped_model/scoped_model.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,6 +22,7 @@ class PageProfile extends StatefulWidget {
 
 class _PageProfileState extends State<PageProfile>
     with AutomaticKeepAliveClientMixin {
+
   TextEditingController _controller = TextEditingController();
   final _controllerStream = StreamController<QuerySnapshot>.broadcast();
 
@@ -93,9 +96,13 @@ class _PageProfileState extends State<PageProfile>
     }
   }
 
-  _removeClasifiacao(String idServicos) {
-    Firestore.instance.
-    collection("qualificacoes").document(idServicos).delete();
+  ///PO documento só pode ser removido depois que não tiver mais nada,
+  ///dentro dele se nao o Firebase nao permite remover.
+  Future<void> _removeClasifiacao(String servicoId) async {
+    await Firestore.instance.
+    collection("qualificacoes").
+    document(servicoId).collection("stars").
+    document(_idUsuarioLogado).delete();
   }
 
   _removerServico(String idServico) {
@@ -155,7 +162,6 @@ class _PageProfileState extends State<PageProfile>
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       child: Column(
         children: [
@@ -435,12 +441,16 @@ class _PageProfileState extends State<PageProfile>
                           querySnapshot.documents.toList();
 
                           DocumentSnapshot documentSnapshot = servicos[index];
-                          ModelServico servico =
-                          ModelServico.fromdocumentSnapshot(
-                              documentSnapshot);
+                          ModelServico servicoM = ModelServico.fromdocumentSnapshot(documentSnapshot);
 
                           return ItemServicoTileMeusServicos(
-                            servico: servico,
+                            servico: servicoM,
+                            onTapEditing: (){
+                              print(servicoM.title);
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => EditaServico(servicoM)
+                                ));
+                            },
                             onTapRemover: () {
                               showDialog(
                                   context: context,
@@ -568,9 +578,9 @@ class _PageProfileState extends State<PageProfile>
                                                             ),
                                                             onPressed:
                                                                 ()  async {
-                                                              //_removeClasifiacao(servico.id);
-                                                              _removerServico(servico.id);
-                                                              Navigator.of(context).pop(true);
+                                                                  _removeClasifiacao(servicoM.id);
+                                                                  await _removerServico(servicoM.id);
+                                                                   Navigator.of(context).pop(true);
                                                             }),
                                                         RaisedButton(
                                                             color: Colors.grey[

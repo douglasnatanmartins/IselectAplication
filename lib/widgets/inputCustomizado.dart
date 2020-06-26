@@ -13,6 +13,7 @@ class InputCustomizado extends StatelessWidget {
   final List<TextInputFormatter> inputFormatters;
   final Function(String) validator;
   final Function(String) onSaved;
+  final String initialValue;
 
   InputCustomizado({
     @required this.controller,
@@ -25,12 +26,14 @@ class InputCustomizado extends StatelessWidget {
     this.maxLines = 1,
     this.validator,
     this.onSaved,
+    this.initialValue
 
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      initialValue: initialValue,
       controller: this.controller,
       obscureText: this.obscure,
       autofocus: this.autofocus,

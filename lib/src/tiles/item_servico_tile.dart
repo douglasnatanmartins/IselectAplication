@@ -22,38 +22,48 @@ class ItemServicoHomeTile extends StatefulWidget {
 }
 
 class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
+
+  double rating = 1.0;
+  double initialRating = 0.0;
+  double result = 0.0;
+  var ratingSoma;
+  var idDoc;
+
+
   _recuperarDadosDoUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
 
-    await _getEvaluaciones();
+    await _getClassificacao();
   }
 
-  Future<void> _getEvaluaciones() async {
-    DocumentSnapshot snapshot = await Firestore.instance
-        .collection("qualificacoes")
-        .document(widget.servico.id)
-        .collection("stars")
-        .document(_idUsuarioLogado)
-        .get();
+  Future<void> _getClassificacao(){
+    Stream<QuerySnapshot> querySnapshot = Firestore.instance.
+    collection("qualificacoes").
+    document(widget.servico.id).
+    collection("stars").snapshots();
 
-    Map<String, dynamic> dados = snapshot.data;
-    print(dados);
+    querySnapshot.map((docs){
+      List<DocumentSnapshot> snapshot = docs.documents;
+      for(final doc in snapshot){
+        if(doc != null){
+          final index = snapshot.indexOf(doc);
+          idDoc = doc.documentID;
+          if(index == 0){
+            ratingSoma = doc.data["rating"] - doc.data["rating"];
+          }
 
-    if (dados["rating"] != null) {
-        rating = dados["rating"];
+        }
+        result = ratingSoma += doc.data["rating"] / snapshot.length;
+      }
+    //  print(result);
+      initialRating = result;
+    }).toList();
 
-    } else {
-      return 1.0;
-    }
 
-    if (dados["idServico"] != null) {
-      docId = dados["idServico"];
-    }
   }
 
-  var rating = 1.0;
   String docId;
   String _idUsuarioLogado;
 
@@ -65,6 +75,7 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
 
   @override
   Widget build(BuildContext context) {
+
     MediaQueryData mediaQueryData = MediaQuery.of(context);
 
     return GestureDetector(
@@ -157,7 +168,7 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                           }
                           return SmoothStarRating(
                             isReadOnly: true,
-                            rating: rating,
+                            rating: initialRating,
                             size: 12,
                             borderColor: Colors.grey,
                             color: Colors.amber,
@@ -169,7 +180,7 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                             spacing: 2,
                             onRated: (value) {
                                 setState(() {
-                                  rating = value;
+                                  initialRating = value;
                                 });
                             },
                           );

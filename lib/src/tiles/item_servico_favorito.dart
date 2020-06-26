@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/model/model_servico.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ItemServicoFavoritos extends StatefulWidget {
 
@@ -21,11 +23,59 @@ class ItemServicoFavoritos extends StatefulWidget {
 
 class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
 
-  var rating = 3.5;
+
+
+  var rating = 1.0;
+  double initialRating = 1.0;
+  double result = 0.0;
+  var ratingSoma;
+  var idDoc;
+  String _idUsuarioLogado;
+
+
+  _recuperarDadosDoUsuario() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseUser usuarioLogado = await auth.currentUser();
+    _idUsuarioLogado = usuarioLogado.uid;
+
+    await _getClassificacao();
+  }
+
+
+
+  Future<void> _getClassificacao(){
+    Stream<QuerySnapshot> querySnapshot = Firestore.instance.
+    collection("qualificacoes").
+    document(widget.servico.id).
+    collection("stars").snapshots();
+
+    querySnapshot.map((docs){
+      List<DocumentSnapshot> snapshot = docs.documents;
+      for(final doc in snapshot){
+        if(doc != null){
+          final index = snapshot.indexOf(doc);
+          idDoc = doc.documentID;
+          if(index == 0){
+            ratingSoma = doc.data["rating"] - doc.data["rating"];
+          }
+
+        }
+        result = ratingSoma += doc.data["rating"] / snapshot.length;
+
+      }
+      initialRating = result;
+      print(initialRating);
+    }).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _recuperarDadosDoUsuario();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     MediaQueryData mediaQueryData = MediaQuery.of(context);
 
     return GestureDetector(
@@ -84,7 +134,8 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
                     padding:
                     const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
                     child: SmoothStarRating(
-                      rating: rating,
+                      isReadOnly: true,
+                      rating: initialRating,
                       size: 12,
                       borderColor: Colors.grey,
                       color: Colors.amber,
@@ -92,7 +143,7 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
                       halfFilledIconData: Icons.star_half,
                       defaultIconData: Icons.star_border,
                       starCount: 5,
-                      allowHalfRating: true,
+                      allowHalfRating: false,
                       spacing: 2,
                     )
                 ),

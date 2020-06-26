@@ -10,6 +10,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// ignore: must_be_immutable
 class DetalheAnuncio extends StatefulWidget {
   ModelServico servico;
   DetalheAnuncio(this.servico);
@@ -20,11 +21,17 @@ class DetalheAnuncio extends StatefulWidget {
 
 class _DetalheAnuncioState extends State<DetalheAnuncio> {
   List<ModelServico> servicosModel = [];
+
+  var ratingSoma = 0.0;
+  var idDoc;
+  double result = 0.0;
   bool duplicado = false;
   String docId;
   bool favoritoexiste = false;
   String _idUsuarioLogado;
+  var ratinginitial = 0.5;
   var rating = 0.5;
+  var index;
   var qualificacoes;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _controllerCalificacoes = StreamController<QuerySnapshot>.broadcast();
@@ -34,7 +41,7 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
 
-    await _getEvaluaciones();
+    await _getClassificacao();
     await _adicionarOuvintedeQualificacoes();
     await _getFavoritos();
   }
@@ -52,34 +59,32 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
     }).toList();
   }
 
-  _getEvaluaciones() async {
-    DocumentSnapshot snapshot = await Firestore.instance
-        .collection("qualificacoes")
-        .document(widget.servico.id)
-        .collection("stars")
-        .document(_idUsuarioLogado)
-        .get();
+  // ignore: missing_return
+  Future<void> _getClassificacao(){
+    Stream<QuerySnapshot> querySnapshot = Firestore.instance.
+    collection("qualificacoes").
+    document(widget.servico.id).
+    collection("stars").snapshots();
 
-    Map<String, dynamic> dados = snapshot.data;
+    querySnapshot.map((docs){
+      List<DocumentSnapshot> snapshot = docs.documents;
+      for(final doc in snapshot){
+        if(doc != null){
+          final index = snapshot.indexOf(doc);
+          idDoc = doc.documentID;
+          if(index == 0){
+            ratingSoma = doc.data["rating"] - doc.data["rating"];
+          }
 
-    if (dados == null) {
-
-      print(dados);
-      return Text("${snapshot.hashCode.toString()}");
-    }
-    if (snapshot.data["rating"] != null) {
-      setState(() {
-        rating = snapshot.data["rating"];
-      });
-    }
-
-    if (snapshot.data["idServico"] != null) {
-      setState(() {
-        docId = snapshot.data["idServico"];
-      });
-    }
+        }
+        result = ratingSoma += doc.data["rating"] / snapshot.length;
+      }
+      print(result);
+      ratinginitial = result;
+    }).toList();
   }
-
+  
+  // ignore: missing_return
   Future<Stream<QuerySnapshot>> _adicionarOuvintedeQualificacoes() async {
     Stream<QuerySnapshot> stream =
     Firestore.instance
@@ -197,15 +202,13 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                                         MainAxisAlignment.center,
                                         children: [
                                           SmoothStarRating(
-                                            rating: rating,
+                                            rating: ratinginitial,
                                             color: Colors.orange[600],
                                             size: 30,
                                             borderColor: Colors.grey,
                                             starCount: 5,
                                             onRated: (value) {
-                                              setState(() {
-                                                rating = value;
-                                              });
+                                              rating = value;
                                             },
                                           )
                                         ],
@@ -334,15 +337,14 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                                   }
                                   return SmoothStarRating(
                                     isReadOnly: true,
-                                    rating: rating,
+                                    rating: ratinginitial,
                                     color: Colors.orange[600],
                                     size: 30,
                                     borderColor: Colors.grey,
                                     starCount: 5,
                                     onRated: (value) {
                                       setState(() {
-                                        if (snapshot.data != null)
-                                          rating = snapshot.data["rating"];
+                                        ratinginitial = value;
                                       });
                                     },
                                   );
@@ -643,9 +645,11 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                         ),
                         GestureDetector(
                           onTap: () {
+                            print(widget.servico.lat);
+                            print(widget.servico.long);
                             launch(
-                                "https://www.google.com/maps/search/?api=1&query=${widget.servico.lat},"
-                                    "${widget.servico.long}");
+                                "https://www.google.com/maps/search/?api=1&query=${widget.servico.long},"
+                                    "${widget.servico.lat}");
                           },
                           child: Container(
                               width: MediaQuery.of(context).size.width - 220,

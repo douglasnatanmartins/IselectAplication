@@ -6,11 +6,13 @@ class ItemServicoTileMeusServicos extends StatelessWidget {
   ModelServico servico;
   VoidCallback onTapItem;
   VoidCallback onTapRemover;
+  VoidCallback onTapEditing;
 
   ItemServicoTileMeusServicos({
     @required this.servico,
     @required this.onTapItem,
     @required this.onTapRemover,
+    @required this.onTapEditing
   });
 
   @override
@@ -37,40 +39,70 @@ class ItemServicoTileMeusServicos extends StatelessWidget {
               ], begin: Alignment.bottomRight, end: Alignment.topLeft),
               color: Colors.black,
               borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-              title: Text(
-                servico.title,
-                style: GoogleFonts.amaranth(textStyle: TextStyle(
-                    fontSize: 20,
-                    decoration: TextDecoration.underline
-                )),
-              ),
-              subtitle: Text(
-                servico.preco,
-                style: GoogleFonts.amaranth(textStyle: TextStyle(
-                  fontSize: 15,
-                )),
-              ),
-              leading: Container(
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                        image: NetworkImage(servico.fotos[0]),
-                        fit: BoxFit.cover)),
-              ),
-              trailing: this.onTapRemover != null
-                  ? IconButton(
-                  icon: Icon(
-                    Icons.delete_forever,
-                    color: Colors.redAccent,
-                    size: 30,
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: 10),
+                child: Container(
+                  height: MediaQuery.of(context).size.height / 8,
+                  width: MediaQuery.of(context).size.width /3.5,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      image: DecorationImage(
+                          image: NetworkImage(servico.fotos[0]),
+                          fit: BoxFit.cover
+                      )
                   ),
-                  onPressed: this.onTapRemover)
-                  : Text("")),
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    SizedBox(height: 10,),
+                    Text(
+                      servico.title,
+                      style: GoogleFonts.amaranth(textStyle: TextStyle(
+                          fontSize: 16,
+                          decoration: TextDecoration.underline
+                      )),
+                    ),
+                    SizedBox(height: 8,),
+                    Text(
+                      servico.preco,
+                      style: GoogleFonts.amaranth(textStyle: TextStyle(
+                          fontSize: 14,
+                      )),
+                    ),
+                  ],
+                )
+              ),
+              Positioned(
+                right: 5,
+                top: 20,
+                child:this.onTapRemover != null ? Row(
+                  children: [
+                    IconButton(
+                        icon: Icon(
+                          Icons.edit,
+                          color: Colors.black,
+                          size: 25,
+                        ),
+                        onPressed: onTapEditing),
+                    IconButton(
+                        icon: Icon(
+                          Icons.delete_forever,
+                          color: Colors.redAccent,
+                          size: 25,
+                        ),
+                        onPressed: this.onTapRemover),
+                  ],
+                ): Text("")
+              )
+            ],
+          )
+          )
         ),
-      ),
-    );
+      );
   }
 }
