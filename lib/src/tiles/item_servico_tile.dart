@@ -34,35 +34,8 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
-
-    await _getClassificacao();
   }
 
-  Future<void> _getClassificacao(){
-    Stream<QuerySnapshot> querySnapshot = Firestore.instance.
-    collection("qualificacoes").
-    document(widget.servico.id).
-    collection("stars").snapshots();
-
-    querySnapshot.map((docs){
-      List<DocumentSnapshot> snapshot = docs.documents;
-      for(final doc in snapshot){
-        if(doc != null){
-          final index = snapshot.indexOf(doc);
-          idDoc = doc.documentID;
-          if(index == 0){
-            ratingSoma = doc.data["rating"] - doc.data["rating"];
-          }
-
-        }
-        result = ratingSoma += doc.data["rating"] / snapshot.length;
-      }
-    //  print(result);
-      initialRating = result;
-    }).toList();
-
-
-  }
 
   String docId;
   String _idUsuarioLogado;
@@ -116,16 +89,22 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                     ),
                     Container(
                       height: 25.5,
-                      width: 85.0,
+                      width: 95.0,
                       decoration: BoxDecoration(
                           color: Colors.orange[600],
                           borderRadius: BorderRadius.only(
                               bottomRight: Radius.circular(20.0),
                               topLeft: Radius.circular(5.0))),
                       child: Center(
-                          child: Text(
-                        "Destacado",
+                          child: widget.servico.rating <= 2
+                              ? Text ("Nuevo",
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.white, fontWeight: FontWeight.w600),
+                          ) : Text(
+                        widget.servico.rating >= 4  ? "Destacado" : "Mejor Valorado",
                         style: TextStyle(
+                          fontSize: 12,
                             color: Colors.white, fontWeight: FontWeight.w600),
                       )),
                     ),
@@ -135,13 +114,11 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                 Padding(
                   padding:
                       const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
-                  child: FutureBuilder<DocumentSnapshot>(
-                    future: Firestore.instance
-                        .collection("qualificacoes")
-                        .document(widget.servico.id)
-                        .collection("stars")
-                        .document(_idUsuarioLogado)
-                        .get(),
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: Firestore.instance.
+                    collection("qualificacoes").
+                    document(widget.servico.id).
+                    collection("stars").snapshots(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return SizedBox(
@@ -153,6 +130,20 @@ class _ItemServicoHomeTileState extends State<ItemServicoHomeTile> {
                               baseColor: Colors.orange,
                               highlightColor: Colors.white),
                         );
+                      }
+                      QuerySnapshot querySnapshot = snapshot.data;
+                      List<DocumentSnapshot> snapshots = querySnapshot.documents.toList();
+                      for(final doc in snapshots){
+                        if(doc != null){
+                          final index = snapshots.indexOf(doc);
+                          idDoc = doc.documentID;
+                          if(index == 0){
+                            ratingSoma = doc.data["rating"] - doc.data["rating"];
+                          }
+
+                        }
+                        result = ratingSoma += doc.data["rating"] / snapshots.length;
+                        initialRating = result.round().roundToDouble();
                       }
                       switch (snapshot.connectionState) {
                         case ConnectionState.none:

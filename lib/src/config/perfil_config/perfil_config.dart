@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:iselectaplication1990/componentes/localizacao.dart';
+import 'package:iselectaplication1990/src/screems/s/perfil_screem.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:validadores/validadores.dart';
 
@@ -160,7 +161,9 @@ class _PerfilConfigState extends State<PerfilConfig> {
           insetAnimationDuration: Duration(milliseconds: 800),
         ),
       ).then((_){
-        Navigator.of(context).pop(true);
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PerfilScreem()
+        ));
       });
     });
   }

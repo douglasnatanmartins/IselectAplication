@@ -37,7 +37,7 @@ class _HomeScreemPageState extends State<HomeScreemPage> {
 
     Firestore db = Firestore.instance;
     Stream<QuerySnapshot> stream = db
-        .collection("servicos")
+        .collection("servicos").orderBy("rating")
         .snapshots();
 
     stream.listen((dados){
@@ -182,7 +182,7 @@ class _HomeScreemPageState extends State<HomeScreemPage> {
                               itemBuilder: (_, index){
 
                                 List<DocumentSnapshot> servicos =
-                                querySnapshot.documents.toList();
+                                querySnapshot.documents.toList().reversed.toList();
                                 DocumentSnapshot documentSnapshot = servicos[index];
                                 ModelServico servico = ModelServico.fromdocumentSnapshot(documentSnapshot);
 

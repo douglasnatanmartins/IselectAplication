@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/model/user_model.dart';
+import 'package:iselectaplication1990/src/login/login_screem.dart';
 import 'package:iselectaplication1990/src/sobre_app/sobre_o_app.dart';
 import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/config/conf_usuario/configuracoes_do_usuario.dart';
 import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/config/perfil_config/perfil_config.dart';
@@ -18,7 +19,7 @@ class _PerfilScreemState extends State<PerfilScreem> {
 
   String _idUsuarioLogado;
   String _urlImagemRecuperada;
-  String _name;
+  String name;
   String _email;
   String cidade;
   String estado;
@@ -44,7 +45,7 @@ class _PerfilScreemState extends State<PerfilScreem> {
     }
     if (dados["name"] != null) {
       setState(() {
-        _name = dados["name"];
+        name = snapshot.data["name"];
       });
     }
     if (dados["email"] != null) {
@@ -52,7 +53,7 @@ class _PerfilScreemState extends State<PerfilScreem> {
         _email= dados["email"];
       });
     }
-    if (dados["cidade"] != null) {
+   /* if (dados["cidade"] != null) {
       setState(() {
         cidade = dados["cidade"];
       });
@@ -71,7 +72,7 @@ class _PerfilScreemState extends State<PerfilScreem> {
       setState(() {
         rua = dados["rua"];
       });
-    }
+    }*/
   }
 
   @override
@@ -120,7 +121,7 @@ class _PerfilScreemState extends State<PerfilScreem> {
               ),
             ),
             Text(
-              _name != null ? _name : "Nome do Usuario",
+              name != null ? name : "Nome do Usuario",
               style: GoogleFonts.amaranth(
                   color: Colors.black,
                   fontSize: 18
@@ -285,6 +286,9 @@ class _PerfilScreemState extends State<PerfilScreem> {
                 return GestureDetector(
                   onTap: (){
                     model.signOut();
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => LoginPage()
+                    ));
                   },
                   child: Container(
                       height: 50,

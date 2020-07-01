@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/model/user_model.dart';
-import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/home/home_screem_page.dart';
+import 'package:iselectaplication1990/src/home/home_screem_botton_navigator.dart';
 import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/login/login_screem.dart';
 import 'file:///C:/ProjetosFlutter/iselectaplication1990/lib/src/login/componentes/bleaze_container.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
@@ -373,7 +373,7 @@ class _SignUpPageState extends State<SignUpPage> {
     Future.delayed(Duration(seconds: 2)).then((funtion) {
       Navigator.of(context).pushReplacement(PageTransition(
           type: PageTransitionType.rotate,
-          child: HomeScreemPage(),
+          child: HomeScreen(),
           duration: Duration(milliseconds: 800)));
     });
   }

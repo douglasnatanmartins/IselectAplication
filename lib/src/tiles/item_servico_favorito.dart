@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iselectaplication1990/model/model_servico.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,37 +38,8 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
-
-    await _getClassificacao();
   }
 
-
-
-   _getClassificacao(){
-    Stream<QuerySnapshot> querySnapshot = Firestore.instance.
-    collection("qualificacoes").
-    document(widget.servico.id).
-    collection("stars").snapshots();
-
-    querySnapshot.map((docs){
-      List<DocumentSnapshot> snapshot = docs.documents;
-      for(final doc in snapshot){
-        if(doc != null){
-          final index = snapshot.indexOf(doc);
-          idDoc = doc.documentID;
-          if(index == 0){
-            ratingSoma = doc.data["rating"] - doc.data["rating"];
-          }
-
-        }
-        result = ratingSoma += doc.data["rating"] / snapshot.length;
-        initialRating = result.round().roundToDouble();
-      }
-      print(initialRating);
-    }).toList();
-    return initialRating;
-
-  }
 
   @override
   void initState() {
@@ -135,18 +107,71 @@ class _ItemServicoFavoritosState extends State<ItemServicoFavoritos> {
                 Padding(
                     padding:
                     const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
-                    child: SmoothStarRating(
-                      isReadOnly: true,
-                      rating: rating,
-                      size: 12,
-                      borderColor: Colors.grey,
-                      color: Colors.amber,
-                      filledIconData: Icons.star,
-                      halfFilledIconData: Icons.star_half,
-                      defaultIconData: Icons.star_border,
-                      starCount: 5,
-                      allowHalfRating: false,
-                      spacing: 2,
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: Firestore.instance.
+                      collection("qualificacoes").
+                      document(widget.servico.id).
+                      collection("stars").snapshots(),
+                      builder: (context, snapshot){
+                        if (!snapshot.hasData) {
+                          return SizedBox(
+                            height: 10,
+                            width: 100,
+                            child: Shimmer.fromColors(
+                                period: Duration(milliseconds: 1000),
+                                child: Container(color: Colors.white),
+                                baseColor: Colors.orange,
+                                highlightColor: Colors.white),
+                          );
+                        }
+
+                        QuerySnapshot querySnapshot = snapshot.data;
+                        List<DocumentSnapshot> snapshots = querySnapshot.documents.toList();
+                        for(final doc in snapshots){
+                          if(doc != null){
+                            final index = snapshots.indexOf(doc);
+                            idDoc = doc.documentID;
+                            if(index == 0){
+                              ratingSoma = doc.data["rating"] - doc.data["rating"];
+                            }
+
+                          }
+                          result = ratingSoma += doc.data["rating"] / snapshots.length;
+                          initialRating = result.round().roundToDouble();
+                        }
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.none:
+                          case ConnectionState.waiting:
+                            return Container();
+                            break;
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            return SmoothStarRating(
+                              isReadOnly: true,
+                              rating: initialRating,
+                              size: 12,
+                              borderColor: Colors.grey,
+                              color: Colors.amber,
+                              filledIconData: Icons.star,
+                              halfFilledIconData: Icons.star_half,
+                              defaultIconData: Icons.star_border,
+                              starCount: 5,
+                              allowHalfRating: false,
+                              spacing: 2,
+                              onRated: (value) {
+                                setState(() {
+                                  initialRating = value;
+                                });
+                              },
+                            );
+                        }
+                        return Container();
+                      },
                     )
                 ),
                 Padding(padding: EdgeInsets.only(top: 2.0)),

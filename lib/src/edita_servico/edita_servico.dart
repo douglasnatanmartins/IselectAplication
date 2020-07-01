@@ -29,7 +29,9 @@ class _EditaServicoState extends State<EditaServico> {
       mask: "##############", filter: {"#": RegExp(r'[0-9]')});
 
   var selecCurrency;
-  String _idUsuarioLogado;
+  String _idUsuarioLogado = "Não ten id";
+
+  String idRecuperado;
 
   _recuperarDadosDoUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
@@ -88,16 +90,23 @@ class _EditaServicoState extends State<EditaServico> {
           .updateData(widget.servico.toMap())
           .then((_) {
 
-        //Salvando dados editados no Anuncio Favorito
-         db.collection("meus_favoritos")
-            .document(_idUsuarioLogado)
-         .collection("favoritos").document(widget.servico.id)
-            .updateData(widget.servico.toMap())
-            .then((_) {
+            if(db.collection("meus_favoritos").document(_idUsuarioLogado) != null){
 
-           Navigator.pop(_dialogContext);
-           Navigator.of(context).pop();
-        });
+              db.collection("meus_favoritos")
+                  .document(_idUsuarioLogado)
+                  .collection("favoritos").document(widget.servico.id)
+                  .updateData(widget.servico.toMap())
+                  .then((_) {
+
+                Navigator.pop(_dialogContext);
+                Navigator.of(context).pop();
+              }).catchError((e){
+                print(e);
+                Navigator.pop(_dialogContext);
+                Navigator.of(context).pop();
+              });
+            }
+        //Salvando dados editados no Anuncio Favorito
 
       });
     });
@@ -233,6 +242,7 @@ class _EditaServicoState extends State<EditaServico> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 20, top: 20),
                     child: InputCustomizado(
+                      maxLength: 20,
                       initialValue: widget.servico.title,
                       labelText: "Titulo",
                       hint: "Titulo",
@@ -249,6 +259,7 @@ class _EditaServicoState extends State<EditaServico> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 15),
                     child: InputCustomizado(
+                      maxLength: 15,
                       initialValue: widget.servico.preco,
                       labelText: "Precio",
                       inputFormatters: [

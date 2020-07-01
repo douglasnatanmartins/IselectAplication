@@ -404,6 +404,7 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 20, top: 20),
                     child: InputCustomizado(
+                      maxLength: 20,
                       labelText: "Titulo",
                       hint: "Titulo",
                       validator: (valor){
@@ -420,6 +421,7 @@ class _AdiconaServicosState extends State<AdiconaServicos> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 15),
                     child: InputCustomizado(
+                      maxLength: 15,
                       labelText: "Precio",
                       inputFormatters: [
                         // maskTextInputFormatterPreco

@@ -14,6 +14,7 @@ class InputCustomizado extends StatelessWidget {
   final Function(String) validator;
   final Function(String) onSaved;
   final String initialValue;
+  final int maxLength;
 
   InputCustomizado({
     @required this.controller,
@@ -26,13 +27,15 @@ class InputCustomizado extends StatelessWidget {
     this.maxLines = 1,
     this.validator,
     this.onSaved,
-    this.initialValue
+    this.initialValue,
+    this.maxLength
 
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLength: maxLength,
       initialValue: initialValue,
       controller: this.controller,
       obscureText: this.obscure,

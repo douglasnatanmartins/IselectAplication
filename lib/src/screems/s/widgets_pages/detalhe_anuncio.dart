@@ -29,7 +29,7 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
   String docId;
   bool favoritoexiste = false;
   String _idUsuarioLogado;
-  var ratinginitial = 0.5;
+  var initialRating = 0.5;
   var rating = 0.5;
   var index;
   var qualificacoes;
@@ -41,7 +41,7 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
     FirebaseUser usuarioLogado = await auth.currentUser();
     _idUsuarioLogado = usuarioLogado.uid;
 
-    await _getClassificacao();
+
     await _adicionarOuvintedeQualificacoes();
     await _getFavoritos();
   }
@@ -56,31 +56,6 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
             image:
             DecorationImage(image: NetworkImage(url), fit: BoxFit.cover)),
       );
-    }).toList();
-  }
-
-  // ignore: missing_return
-  Future<void> _getClassificacao(){
-    Stream<QuerySnapshot> querySnapshot = Firestore.instance.
-    collection("qualificacoes").
-    document(widget.servico.id).
-    collection("stars").snapshots();
-
-    querySnapshot.map((docs){
-      List<DocumentSnapshot> snapshot = docs.documents;
-      for(final doc in snapshot){
-        if(doc != null){
-          final index = snapshot.indexOf(doc);
-          idDoc = doc.documentID;
-          if(index == 0){
-            ratingSoma = doc.data["rating"] - doc.data["rating"];
-          }
-
-        }
-        result = ratingSoma += doc.data["rating"] / snapshot.length;
-      }
-      print(result);
-      ratinginitial = result;
     }).toList();
   }
   
@@ -201,16 +176,63 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                                         mainAxisAlignment:
                                         MainAxisAlignment.center,
                                         children: [
-                                          SmoothStarRating(
-                                            rating: ratinginitial,
-                                            color: Colors.orange[600],
-                                            size: 30,
-                                            borderColor: Colors.grey,
-                                            starCount: 5,
-                                            onRated: (value) {
-                                              rating = value;
+                                          StreamBuilder<QuerySnapshot>(
+                                            stream: Firestore.instance.
+                                            collection("qualificacoes").
+                                            document(widget.servico.id).
+                                            collection("stars").snapshots(),
+                                            builder: (context, snapshot) {
+                                              if (!snapshot.hasData) {
+                                                return SizedBox(
+                                                  height: 10,
+                                                  width: 100,
+                                                  child: Shimmer.fromColors(
+                                                      period: Duration(milliseconds: 1000),
+                                                      child: Container(color: Colors.white),
+                                                      baseColor: Colors.orange,
+                                                      highlightColor: Colors.white),
+                                                );
+                                              }
+                                              QuerySnapshot querySnapshot = snapshot.data;
+                                              List<DocumentSnapshot> snapshots = querySnapshot.documents.toList();
+                                              for(final doc in snapshots){
+                                                if(doc != null){
+                                                  final index = snapshots.indexOf(doc);
+                                                  idDoc = doc.documentID;
+                                                  if(index == 0){
+                                                    ratingSoma = doc.data["rating"] - doc.data["rating"];
+                                                  }
+
+                                                }
+                                                result = ratingSoma += doc.data["rating"] / snapshots.length;
+                                                initialRating = result.round().roundToDouble();
+                                              }
+                                              switch (snapshot.connectionState) {
+                                                case ConnectionState.none:
+                                                case ConnectionState.waiting:
+                                                  return Container();
+                                                  break;
+                                                case ConnectionState.active:
+                                                case ConnectionState.done:
+                                                  if (snapshot.hasError) {
+                                                    return Center(
+                                                      child: CircularProgressIndicator(),
+                                                    );
+                                                  }
+                                                  return SmoothStarRating(
+                                                    rating: initialRating,
+                                                    color: Colors.orange[600],
+                                                    size: 30,
+                                                    borderColor: Colors.grey,
+                                                    starCount: 5,
+                                                    onRated: (value) {
+                                                      rating = value;
+                                                    },
+                                                  );
+                                              }
+                                              return Container();
                                             },
-                                          )
+                                          ),
                                         ],
                                       ),
                                       SizedBox(height: 12),
@@ -301,13 +323,11 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          FutureBuilder<DocumentSnapshot>(
-                            future: Firestore.instance
-                                .collection("qualificacoes")
-                                .document(widget.servico.id)
-                                .collection("stars")
-                                .document(_idUsuarioLogado)
-                                .get(),
+                          StreamBuilder<QuerySnapshot>(
+                            stream: Firestore.instance.
+                            collection("qualificacoes").
+                            document(widget.servico.id).
+                            collection("stars").snapshots(),
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
                                 return SizedBox(
@@ -315,13 +335,24 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                                   width: 100,
                                   child: Shimmer.fromColors(
                                       period: Duration(milliseconds: 1000),
-                                      child: Container(
-                                          color: Colors.white
-                                      ),
+                                      child: Container(color: Colors.white),
                                       baseColor: Colors.orange,
-                                      highlightColor: Colors.white
-                                  ),
+                                      highlightColor: Colors.white),
                                 );
+                              }
+                              QuerySnapshot querySnapshot = snapshot.data;
+                              List<DocumentSnapshot> snapshots = querySnapshot.documents.toList();
+                              for(final doc in snapshots){
+                                if(doc != null){
+                                  final index = snapshots.indexOf(doc);
+                                  idDoc = doc.documentID;
+                                  if(index == 0){
+                                    ratingSoma = doc.data["rating"] - doc.data["rating"];
+                                  }
+
+                                }
+                                result = ratingSoma += doc.data["rating"] / snapshots.length;
+                                initialRating = result.round().roundToDouble();
                               }
                               switch (snapshot.connectionState) {
                                 case ConnectionState.none:
@@ -337,14 +368,14 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                                   }
                                   return SmoothStarRating(
                                     isReadOnly: true,
-                                    rating: ratinginitial,
+                                    rating: initialRating,
                                     color: Colors.orange[600],
                                     size: 30,
                                     borderColor: Colors.grey,
                                     starCount: 5,
                                     onRated: (value) {
                                       setState(() {
-                                        ratinginitial = value;
+                                        initialRating = value;
                                       });
                                     },
                                   );
@@ -645,8 +676,6 @@ class _DetalheAnuncioState extends State<DetalheAnuncio> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            print(widget.servico.lat);
-                            print(widget.servico.long);
                             launch(
                                 "https://www.google.com/maps/search/?api=1&query=${widget.servico.long},"
                                     "${widget.servico.lat}");

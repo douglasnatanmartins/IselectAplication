@@ -20,8 +20,7 @@ class PageProfile extends StatefulWidget {
   _PageProfileState createState() => _PageProfileState();
 }
 
-class _PageProfileState extends State<PageProfile>
-    with AutomaticKeepAliveClientMixin {
+class _PageProfileState extends State<PageProfile>{
 
   TextEditingController _controller = TextEditingController();
   final _controllerStream = StreamController<QuerySnapshot>.broadcast();
@@ -46,12 +45,13 @@ class _PageProfileState extends State<PageProfile>
 
   // bool _subindoImagen = false;
   String _urlImagemRecuperada;
-  String _name;
+  String name;
   String _telefone;
   double _lat;
   double _long;
 
   String _idUsuarioLogado;
+
   _recuperarDadosDoUsuario() async {
     FirebaseAuth auth = FirebaseAuth.instance;
     FirebaseUser usuarioLogado = await auth.currentUser();
@@ -61,22 +61,18 @@ class _PageProfileState extends State<PageProfile>
     DocumentSnapshot snapshot =
         await db.collection("users").document(_idUsuarioLogado).get();
 
-    Map<String, dynamic> dados = await snapshot.data;
+    Map<String, dynamic> dados = snapshot.data;
     _controller.text = dados["name"];
+
 
     if (dados["icon"] != null) {
       setState(() {
-        _urlImagemRecuperada = dados["icon"];
+        _urlImagemRecuperada = snapshot.data["icon"];
       });
     }
     if (dados["name"] != null) {
       setState(() {
-        _name = dados["name"];
-      });
-    }
-    if (dados["email"] != null) {
-      setState(() {
-        _email = dados["email"];
+        name = snapshot.data["name"];
       });
     }
     if (dados["telefone"] != null) {
@@ -253,7 +249,7 @@ class _PageProfileState extends State<PageProfile>
                                         )),
                                   ),
                                   Text(
-                                    _name != null ? "${_name}" : "",
+                                    name != null ? name : "",
                                     style: GoogleFonts.portLligatSans(
                                         textStyle: TextStyle(
                                           color: Colors.black,
@@ -270,7 +266,7 @@ class _PageProfileState extends State<PageProfile>
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   Text(
-                                    _telefone != null ? "${_telefone}" : "",
+                                    _telefone != null ? _telefone : "",
                                     style: GoogleFonts.portLligatSans(
                                         textStyle: TextStyle(
                                           color: Colors.black,
@@ -446,7 +442,6 @@ class _PageProfileState extends State<PageProfile>
                           return ItemServicoTileMeusServicos(
                             servico: servicoM,
                             onTapEditing: (){
-                              print(servicoM.title);
                                 Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => EditaServico(servicoM)
                                 ));
@@ -620,8 +615,4 @@ class _PageProfileState extends State<PageProfile>
       ),
     );
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }

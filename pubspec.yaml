@@ -57,6 +57,7 @@ dependencies:
   line_awesome_icons: ^1.0.4+2
   shimmer: ^1.1.1
   uuid: ^2.1.0
+  transparent_image: ^1.0.0
 
 dev_dependencies:
   flutter_test:
